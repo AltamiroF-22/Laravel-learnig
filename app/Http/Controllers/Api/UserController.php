@@ -52,4 +52,33 @@ class UserController extends Controller
             'message' => $users
         ], 200);
     }
+
+    /**
+     * Exibe os detalhes de um usuário específico.
+     *
+     * @param User $user O objeto do usuário a ser exibido.
+     * @return JsonResponse
+     *
+     * Exemplo de requisição:
+     * GET /api/users/{id}
+     * 
+     * Resposta:
+     * {
+     *   "status": true,
+     *   "message": {
+     *     "id": 1,
+     *     "name": "Altamiro",
+     *     "email": "altamiro@email.com",
+     *     "created_at": "2024-02-27T12:00:00.000000Z",
+     *     "updated_at": "2024-02-27T12:00:00.000000Z"
+     *   }
+     * }
+     */
+    public function show(User $user): JsonResponse
+    {
+        return response()->json([
+            'status' => true,
+            'message' => $user,
+        ], 200);
+    }
 }
