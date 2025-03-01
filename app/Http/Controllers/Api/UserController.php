@@ -238,4 +238,43 @@ class UserController extends Controller
         }
     }
 
+        /**
+     * Remove um usuário do sistema.
+     *
+     * @param User $user O usuário a ser excluído.
+     * @return JsonResponse Retorna uma resposta JSON indicando o sucesso ou falha da operação.
+     *
+     * Exemplo de requisição:
+     * DELETE /api/users/{id}
+     *
+     * Respostas possíveis:
+     * 1. Sucesso (Usuário encontrado e deletado):
+     * {
+     *   "status": true,
+     *   "message": "Usuário deletado com sucesso!",
+     *   "user": {
+     *     "id": 1,
+     *     "name": "Altamiro",
+     *     "email": "altamiro@email.com",
+     *     "created_at": "2024-02-27T12:00:00.000000Z",
+     *     "updated_at": "2024-02-27T12:00:00.000000Z"
+     *   }
+     * }
+     *
+     * 2. Erro (Usuário não encontrado):
+     * {
+     *   "message": "No query results for model [App\\Models\\User] 9999"
+     * }
+     * Código de status: 404 (Not Found)
+     */
+    public function destroy(User $user): JsonResponse
+    {
+        $user->delete();
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Usuário deletado com sucesso!',
+            'user' => $user
+        ], 200);
+    }
 }
