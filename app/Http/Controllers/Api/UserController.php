@@ -135,12 +135,12 @@ class UserController extends Controller
                 'password' => 'required|string|min:6',
             ], [
                 'name.required' => 'O nome é obrigatório.',
-                'name.min' => 'O nome deve ter pelo menos 4 caracteres.',
+                'name.min' => 'O nome deve ter pelo menos :min caracteres.',
                 'email.required' => 'O e-mail é obrigatório.',
                 'email.email' => 'O e-mail deve ser um endereço válido.',
                 'email.unique' => 'Este e-mail já está cadastrado.',
                 'password.required' => 'A senha é obrigatória.',
-                'password.min' => 'A senha deve ter pelo menos 6 caracteres.',
+                'password.min' => 'A senha deve ter pelo menos :min caracteres.',
             ]);
     
             // Cria o usuário
@@ -163,4 +163,79 @@ class UserController extends Controller
             ], 422);
         }
     }
+
+
+       /**
+     * Atualiza os dados de um usuário existente.
+     *
+     * @param Request $request Os dados da requisição contendo nome e e-mail.
+     * @param User $user O usuário a ser atualizado.
+     * @return JsonResponse
+     *
+     * Exemplo de requisição:
+     * PUT /api/users/{id}
+     * 
+     * Corpo da requisição (JSON):
+     * {
+     *   "name": "Altamiro Silva",
+     *   "email": "altamiro.novo@email.com"
+     * }
+     * 
+     * Resposta de sucesso:
+     * {
+     *   "status": true,
+     *   "message": "Usuário atualizado com sucesso!",
+     *   "user": {
+     *     "id": 1,
+     *     "name": "Altamiro Silva",
+     *     "email": "altamiro.novo@email.com",
+     *     "created_at": "2024-02-27T12:00:00.000000Z",
+     *     "updated_at": "2024-02-28T14:00:00.000000Z"
+     *   }
+     * }
+     * 
+     * Resposta de erro (exemplo de erro de validação):
+     * {
+     *   "status": false,
+     *   "message": "Erro de validação.",
+     *   "errors": {
+     *     "name": ["O nome deve ter pelo menos 4 caracteres."],
+     *     "email": ["Este e-mail já está cadastrado."]
+     *   }
+     * }
+     */
+    public function update(Request $request, User $user): JsonResponse
+    {
+        try {
+            $validatedData = $request->validate([
+                'name' => 'required|string|min:4|max:100',
+                'email' => 'required|string|email|unique:users,email,' . $user->id, // Permite manter o mesmo e-mail
+            ], [
+                'name.required' => 'O nome é obrigatório.',
+                'name.min' => 'O nome deve ter pelo menos :min caracteres.',
+                'email.required' => 'O e-mail é obrigatório.',
+                'email.email' => 'O e-mail deve ser um endereço válido.',
+                'email.unique' => 'Este e-mail já está cadastrado.',
+            ]);
+
+            $user->update([
+                'name' => $validatedData['name'],
+                'email' => $validatedData['email'],
+            ]);
+
+            return response()->json([
+                'status' => true,
+                'message' => 'Usuário atualizado com sucesso!',
+                'user' => $user
+            ], 200);
+
+        } catch (ValidationException $e) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Erro de validação.',
+                'errors' => $e->errors()
+            ], 422);
+        }
+    }
+
 }
