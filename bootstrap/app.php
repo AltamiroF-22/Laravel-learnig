@@ -1,5 +1,6 @@
 <?php
 
+use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -15,5 +16,13 @@ return Application::configure(basePath: dirname(__DIR__))
         //
     })
     ->withExceptions(function (Exceptions $exceptions) {
-        //
+        // Lançar exeção quando houver erro de autenticação, exceção do tipo AuthtenticationException
+        $exceptions -> render(function(AuthenticationException $e){
+            //Retornar messagem de eroo 401
+            return response()->json([
+                'status'=> false,
+                'message'=> 'Você precisa estar logado.',
+                'message2'=>'Token inválido!'
+            ],401);
+        });
     })->create();

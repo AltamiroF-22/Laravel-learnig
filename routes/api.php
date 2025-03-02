@@ -13,4 +13,9 @@ Route::put('/users/{user}',[ UserController::class, 'update']); // PUT http://12
 
 Route::delete('/users/{user}',[ UserController::class, 'destroy']); // DELETE http://127.0.0.1:8000/api/users/130
 
-Route::post('/login', [LoginController::class,'login']); //POST http://127.0.0.1:8000/api/login
+Route::post('/login', [LoginController::class,'login'])->name('login'); //POST http://127.0.0.1:8000/api/login
+
+// Rota privada
+Route::group(['middleware' => ['auth:sanctum']],function(){
+    Route::get('/users-rota-privada',[UserController::class, 'index']); // GET http://127.0.0.1:8000/api/users-rota-privada
+});
