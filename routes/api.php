@@ -1,7 +1,7 @@
 <?php
 
+use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\UserController;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/users',[UserController::class, 'index']); // GET http://127.0.0.1:8000/api/users?page=2
@@ -11,4 +11,6 @@ Route::post('/users',[ UserController::class, 'store']); // POST http://127.0.0.
 
 Route::put('/users/{user}',[ UserController::class, 'update']); // PUT http://127.0.0.1:8000/api/users/22
 
-Route::delete('/users/{user}',[ UserController::class, 'destroy']); // DELETE http://127.0.0.1:8000/api/users/13
+Route::delete('/users/{user}',[ UserController::class, 'destroy']); // DELETE http://127.0.0.1:8000/api/users/130
+
+Route::post('/login', [LoginController::class,'login']); //POST http://127.0.0.1:8000/api/login
