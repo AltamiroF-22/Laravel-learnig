@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\User;
+use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -48,7 +51,7 @@ class LoginController extends Controller
      *   "message": "Login ou senha inválida."
      * }
      */
-    public function login(Request $request)
+    public function login(Request $request):JsonResponse
     {
         // Verifica se o usuário forneceu credenciais corretas
         if (Auth::attempt(['email' => $request->email, 'password' => $request->password])) {
@@ -71,4 +74,29 @@ class LoginController extends Controller
             ], 404);
         }
     }
+
+    /**
+    * Realiza o logout do usuário e revoga todos os seus tokens.
+    *
+    * @param User $user Instância do usuário autenticado.
+    * @return JsonResponse Retorna uma mensagem de confirmação do logout.
+    */
+   public function logout(User $user): JsonResponse
+   {
+       try {
+           // Remove todos os tokens do usuário, invalidando o acesso
+           $user->tokens()->delete();
+           
+           return response()->json([
+               'status' => true,
+               'message' => 'Você agora está deslogado.'
+           ], 200);
+       } catch (Exception $e) {
+           // Captura qualquer erro ao tentar deslogar o usuário
+           return response()->json([
+               'status' => false,
+               'message' => 'Erro ao deslogar!'
+           ], 400);
+       }
+   }
 }
