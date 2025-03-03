@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\LoginController;
+use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -22,3 +23,8 @@ Route::group(['middleware' => ['auth:sanctum']],function(){
 
     Route::get('/users-rota-privada',[UserController::class, 'index']); // GET http://127.0.0.1:8000/api/users-rota-privada
 });
+
+
+//Products
+
+Route::get('/products',[ProductController::class,'index']);
