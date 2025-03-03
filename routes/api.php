@@ -38,6 +38,7 @@ Route::put('/products/{product}',[ProductController::class,'update']); // PUT ht
 Route::delete('/products/{product}',[ProductController::class,'destroy']);// DELETE http://127.0.0.1:8000/api/products/13
 
 Route::group(['middleware' => ['auth:sanctum']], function(){
-    Route::post('/products/{product}/favorite', [FavoriteProductController::class, 'store']);
-    Route::delete('/products/{product}/favorite', [FavoriteProductController::class, 'destroy']);
+    Route::post('/products/{product}/favorite', [FavoriteProductController::class, 'store']);  // POST http://127.0.0.1:8000/api/products/22/favorite
+    Route::delete('/products/{product}/favorite', [FavoriteProductController::class, 'destroy']);// POST http://127.0.0.1:8000/api/products/12/favorite
+    Route::get('/favorites', [FavoriteProductController::class, 'index']); // GET http://127.0.0.1:8000/api/favorite?page=2
 });
