@@ -24,6 +24,12 @@ class User extends Authenticatable
         'password',
     ];
 
+   // Define a relação de muitos-para-muitos com o modelo Product
+   public function favoriteProducts()
+   {
+       return $this->belongsToMany(Product::class, 'favorites', 'user_id', 'product_id')->withTimestamps();  // Isso garante que as timestamps sejam mantidas
+   }    
+
     /**
      * The attributes that should be hidden for serialization.
      *

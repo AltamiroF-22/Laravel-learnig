@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\FavoriteProductController;
 use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\UserController;
@@ -35,3 +36,8 @@ Route::post('/products',[ProductController::class,'store']); // POST http://127.
 Route::put('/products/{product}',[ProductController::class,'update']); // PUT http://127.0.0.1:8000/api/products/
 
 Route::delete('/products/{product}',[ProductController::class,'destroy']);// DELETE http://127.0.0.1:8000/api/products/13
+
+Route::group(['middleware' => ['auth:sanctum']], function(){
+    Route::post('/products/{product}/favorite', [FavoriteProductController::class, 'store']);
+    Route::delete('/products/{product}/favorite', [FavoriteProductController::class, 'destroy']);
+});
