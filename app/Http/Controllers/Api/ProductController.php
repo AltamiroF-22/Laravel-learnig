@@ -192,18 +192,134 @@ public function index(): JsonResponse
 
 
     /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, string $id)
+    * Atualiza o recurso especificado no armazenamento.
+    *
+    * @param Request $request Os dados enviados na requisição.
+    * @param Product $product O produto a ser atualizado.
+    * @return JsonResponse Resposta em formato JSON com status e mensagem de sucesso ou erro.
+    *
+    * Exemplo de requisição:
+    * PATCH /api/products/{id}
+    * 
+    * Corpo da requisição:
+    * {
+    *   "name": "Produto Atualizado",
+    *   "description": "Descrição do produto atualizado.",
+    *   "price": 150.00,
+    *   "mainImage": "https://example.com/image.jpg",
+    *   "images": ["https://example.com/image1.jpg", "https://example.com/image2.jpg"],
+    *   "stock": 100,
+    *   "category_id": 2
+    * }
+    *
+    * Resposta de sucesso:
+    * {
+    *   "status": true,
+    *   "message": "Produto atualizado com sucesso!",
+    *   "product": {
+    *     "id": 1,
+    *     "name": "Produto Atualizado",
+    *     "description": "Descrição do produto atualizado.",
+    *     "price": 150.00,
+    *     "mainImage": "https://example.com/image.jpg",
+    *     "images": ["https://example.com/image1.jpg", "https://example.com/image2.jpg"],
+    *     "stock": 100,
+    *     "category_id": 2,
+    *     "created_at": "2025-03-03T00:00:00",
+    *     "updated_at": "2025-03-03T00:00:00"
+    *   }
+    * }
+    *
+    * Resposta de erro:
+    * {
+    *   "status": false,
+    *   "message": "Erro de validação.",
+    *   "errors": {
+    *     "name": ["O nome do produto é obrigatório."],
+    *     "price": ["O preço do produto deve ser um número válido."]
+    *   }
+    * }
+    */
+    public function update(Request $request, Product $product): JsonResponse
     {
-        //
+        try {
+            // Validação dos dados
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'price' => 'required|numeric',
+                'mainImage' => 'nullable|url',
+                'images' => 'nullable|array',
+                'images.*' => 'url',
+                'stock' => 'required|integer|min:0',
+                'category_id' => 'nullable|exists:categories,id'
+            ], [
+                'name.required' => 'O nome do produto é obrigatório.',
+                'name.string' => 'O nome do produto deve ser uma string válida.',
+                'name.max' => 'O nome do produto não pode ter mais de :max caracteres.',
+                'description.string' => 'A descrição deve ser uma string válida.',
+                'price.required' => 'O preço do produto é obrigatório.',
+                'price.numeric' => 'O preço do produto deve ser um número válido.',
+                'mainImage.url' => 'A imagem principal deve ser uma URL válida.',
+                'images.array' => 'As imagens devem ser fornecidas como um array.',
+                'images.*.url' => 'Cada imagem deve ser uma URL válida.',
+                'stock.required' => 'A quantidade em estoque é obrigatória.',
+                'stock.integer' => 'A quantidade em estoque deve ser um número inteiro.',
+                'stock.min' => 'A quantidade em estoque não pode ser menor que :min.',
+                'category_id.exists' => 'A categoria selecionada não existe.',
+            ]);
+    
+            // Atualização do produto
+            $product->update([
+                'name' => $request->name,
+                'description' => $request->description,
+                'price' => $request->price,
+                'mainImage' => $request->mainImage,
+                'images' => $request->images ?? [], // Se não enviar, salva como array vazio
+                'stock' => $request->stock,
+                'category_id' => $request->category_id,
+            ]);
+    
+            // Resposta de sucesso
+            return response()->json([
+                'status' => true,
+                'message' => 'Produto atualizado com sucesso!',
+                'product' => $product
+            ], 200);
+    
+        } catch (ValidationException $e) {
+            // Resposta em caso de erro de validação
+            return response()->json([
+                'status' => false,
+                'message' => 'Erro de validação.',
+                'errors' => $e->errors()
+            ], 422);
+        }
     }
+    
 
     /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(string $id)
+    * Remove o recurso especificado do armazenamento.
+    *
+    * @param Product $product O produto a ser deletado.
+    * @return JsonResponse Resposta em formato JSON com status e mensagem de sucesso.
+    *
+    * Exemplo de requisição:
+    * DELETE /api/products/{id}
+    *
+    * Resposta de sucesso:
+    * {
+    *   "status": true,
+    *   "message": "Produto deletado!"
+    * }
+    */
+    public function destroy(Product $product): JsonResponse
     {
-        //
+        $product->delete();
+
+        return response()->json([
+            'status'=>true,
+            'message' => 'Produto deletado!'
+        ], 200);
     }
 }
