@@ -6,51 +6,190 @@ use App\Http\Controllers\Controller;
 use App\Models\Product;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 
 class ProductController extends Controller
 {
    
-    public function index():JsonResponse
-    {
-        $products = Product::paginate(20);
+   /**
+ * Exibe uma lista paginada de produtos.
+ *
+ * @return JsonResponse
+ *
+ * Exemplo de requisição:
+ * GET /api/products
+ * 
+ * Resposta:
+ * {
+ *   "status": true,
+ *   "message": {
+ *     "data": [
+ *       {
+ *         "id": 1,
+ *         "name": "Produto Exemplo 1",
+ *         "description": "Descrição do produto 1",
+ *         "price": 199.99,
+ *         "mainImage": "https://example.com/imagem-principal1.jpg",
+ *         "created_at": "2024-02-27T12:00:00.000000Z",
+ *         "updated_at": "2024-02-27T12:00:00.000000Z"
+ *       },
+ *       {
+ *         "id": 2,
+ *         "name": "Produto Exemplo 2",
+ *         "description": "Descrição do produto 2",
+ *         "price": 149.99,
+ *         "mainImage": "https://example.com/imagem-principal2.jpg",
+ *         "created_at": "2024-02-27T12:00:00.000000Z",
+ *         "updated_at": "2024-02-27T12:00:00.000000Z"
+ *       }
+ *     ],
+ *     "current_page": 1,
+ *     "last_page": 5,
+ *     "per_page": 20,
+ *     "total": 100
+ *   }
+ * }
+ */
+public function index(): JsonResponse
+{
+    $products = Product::paginate(20);
 
+    return response()->json([
+        'status' => true,
+        'message' => $products
+    ], 200);
+}
+
+
+    /**
+    * Cria um novo produto no banco de dados.
+    *
+    * @param Request $request Os dados do produto a serem salvos.
+    * @return JsonResponse
+    *
+    * Exemplo de requisição:
+    * POST /api/products
+    * 
+    * Corpo da requisição:
+    * {
+    *   "name": "Produto Exemplo",
+    *   "description": "Descrição do produto",
+    *   "price": 199.99,
+    *   "mainImage": "https://example.com/imagem.jpg",
+    *   "images": ["https://example.com/imagem1.jpg"],
+    *   "stock": 50,
+    *   "category_id": 1
+    * }
+    * 
+    * Resposta (em caso de sucesso):
+    * {
+    *   "status": true,
+    *   "message": "Produto criado com sucesso!",
+    *   "product": {
+    *     "id": 1,
+    *     "name": "Produto Exemplo",
+    *     "description": "Descrição do produto",
+    *     "price": 199.99,
+    *     "mainImage": "https://example.com/imagem.jpg",
+    *     "created_at": "2024-02-27T12:00:00.000000Z",
+    *     "updated_at": "2024-02-27T12:00:00.000000Z"
+    *   }
+    * }
+    */
+    public function store(Request $request): JsonResponse
+    {
+        try{
+            // Validação dos dados
+            $request->validate([
+                'name' => 'required|string|max:255',
+                'description' => 'nullable|string',
+                'price' => 'required|numeric',
+                'mainImage' => 'nullable|url', // A imagem principal deve ser uma URL válida
+                'images' => 'nullable|array', // Deve ser um array
+                'images.*' => 'url', // Cada item dentro do array deve ser uma URL
+                'stock' => 'required|integer|min:0',
+                'category_id' => 'nullable|exists:categories,id'
+            ], [
+                'name.required' => 'O nome do produto é obrigatório.',
+                'name.string' => 'O nome do produto deve ser uma string válida.',
+                'name.max' => 'O nome do produto não pode ter mais de :max caracteres.',
+                
+                'description.string' => 'A descrição deve ser uma string válida.',
+                
+                'price.required' => 'O preço do produto é obrigatório.',
+                'price.numeric' => 'O preço do produto deve ser um número válido.',
+                
+                'mainImage.url' => 'A imagem principal deve ser uma URL válida.',
+                
+                'images.array' => 'As imagens devem ser fornecidas como um array.',
+                'images.*.url' => 'Cada imagem deve ser uma URL válida.',
+                
+                'stock.required' => 'A quantidade em estoque é obrigatória.',
+                'stock.integer' => 'A quantidade em estoque deve ser um número inteiro.',
+                'stock.min' => 'A quantidade em estoque não pode ser menor que :min.',
+                
+                'category_id.exists' => 'A categoria selecionada não existe.',
+            ]);
+            
+            // Criação do produto
+            $product = Product::create([
+                'name' => $request->name,
+                'description' => $request->description,
+                'price' => $request->price,
+                'mainImage' => $request->mainImage,
+                'images' => $request->images ?? [], // Se não enviar, salva como array vazio
+                'stock' => $request->stock,
+                'category_id' => $request->category_id,
+            ]);
+
+            // Resposta de sucesso
+            return response()->json([
+                'status'=>true,
+                'message' => 'Produto criado com sucesso!',
+                'product' => $product
+            ], 201);
+
+        }catch(ValidationException $e){
+            // Resposta em caso de erro de validação
+            return response()->json([
+                'status'=>false,
+                'message' => 'Erro de validação.',
+                'errors' => $e->errors()
+            ], 422);
+        }
+    }
+
+     /**
+     * Exibe os detalhes de um produto específico.
+     *
+     * @param Product $product O objeto do produto a ser exibido.
+     * @return JsonResponse
+     *
+     * Exemplo de requisição:
+     * GET /api/products/{id}
+     * 
+     * Resposta:
+     * {
+     *   "status": true,
+     *   "message": {
+     *     "id": 1,
+     *     "name": "Produto Exemplo",
+     *     "description": "Este é um produto de exemplo.",
+     *     "price": 199.99,
+     *     "mainImage": "https://example.com/imagem-principal.jpg",
+     *     "created_at": "2024-02-27T12:00:00.000000Z",
+     *     "updated_at": "2024-02-27T12:00:00.000000Z"
+     *   }
+     * }
+     */
+    public function show(Product $product): JsonResponse
+    {
         return response()->json([
-            'status'=> true,
-            'message'=> $products
-        ]);
+            'status' => true,
+            'message' => $product,
+        ], 200);
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     */
-    public function show(string $id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(string $id)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.

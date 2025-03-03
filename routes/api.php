@@ -27,4 +27,7 @@ Route::group(['middleware' => ['auth:sanctum']],function(){
 
 //Products
 
-Route::get('/products',[ProductController::class,'index']);
+Route::get('/products',[ProductController::class,'index']); // GET http://127.0.0.1:8000/api/products?page=2
+Route::get('/products/{product}',[ProductController::class,'show']); // GET http://127.0.0.1:8000/api/products/22
+
+Route::post('/products',[ProductController::class,'store']); // POST http://127.0.0.1:8000/api/products/
