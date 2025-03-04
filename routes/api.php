@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\FavoriteProductController;
 use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\ProductController;
@@ -42,3 +43,8 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
     Route::delete('/products/{product}/favorite', [FavoriteProductController::class, 'destroy']);// POST http://127.0.0.1:8000/api/products/12/favorite
     Route::get('/favorites', [FavoriteProductController::class, 'index']); // GET http://127.0.0.1:8000/api/favorite?page=2
 });
+
+//⚠️ Não tem relação com as rotas acima
+//Appointments
+Route::post('/appointments', [AppointmentController::class, 'store']);// POST http://127.0.0.1:8000/api/appointments
+Route::get('/appointments', [AppointmentController::class, 'index']);// GET http://127.0.0.1:8000/api/appointments?date=2025-03-11
