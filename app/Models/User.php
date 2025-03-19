@@ -24,6 +24,11 @@ class User extends Authenticatable
         'password',
     ];
 
+    // Relacionamento: um usuário pode ter vários arquivos
+    public function files(){
+        return $this->hasMany(File::class);    
+    }
+
    // Define a relação de muitos-para-muitos com o modelo Product
    public function favoriteProducts()
    {

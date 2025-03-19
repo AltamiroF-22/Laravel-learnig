@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\AppointmentController;
 use App\Http\Controllers\Api\FavoriteProductController;
+use App\Http\Controllers\Api\FileUploadController;
 use App\Http\Controllers\Api\LoginController;
 use App\Http\Controllers\Api\ProductController;
 use App\Http\Controllers\Api\UserController;
@@ -48,3 +49,11 @@ Route::group(['middleware' => ['auth:sanctum']], function(){
 //Appointments
 Route::post('/appointments', [AppointmentController::class, 'store']);// POST http://127.0.0.1:8000/api/appointments
 Route::get('/appointments', [AppointmentController::class, 'index']);// GET http://127.0.0.1:8000/api/appointments?date=2025-03-11
+
+
+// Upload File
+Route::group(['middleware' => ['auth:sanctum']],function(){
+    Route::post('/uploadFile',[FileUploadController::class, 'store']); //POST http://127.0.0.1:8000/api/uploadFile
+});
+Route::get('/files',[FileUploadController::class, 'index']); //GET http://127.0.0.1:8000/api/uploadFile
+Route::get('/user/{userId}/files', [FileUploadController::class, 'getUserFiles']); //GET http://127.0.0.1:8000/api/user/22/files
